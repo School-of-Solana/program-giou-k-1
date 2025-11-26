@@ -1,79 +1,114 @@
 # Project Description
 
-**Deployed Frontend URL:** [TODO: Link to your deployed frontend]
+**Deployed Frontend URL:** https://frontend-giou-ks-projects.vercel.app
 
-**Solana Program ID:** [TODO: Your deployed program's public key]
+**Solana Program ID:** `9NG82RTePVDeDpTZEc4v2c5CnyadftEyaT2v9864CQPX`
 
 ## Project Overview
 
 ### Description
-[TODO: Provide a comprehensive description of your dApp. Explain what it does. Be detailed about the core functionality.]
+This is a simple on-chain message board dApp built on Solana using the Anchor framework. Users can connect their wallet, initialize their account, and post messages that are stored permanently on the blockchain. The application demonstrates core Solana concepts including PDAs (Program Derived Addresses), account initialization, and state management.
 
 ### Key Features
-[TODO: List the main features of your dApp. Be specific about what users can do.]
+- **Wallet Integration:** Connect using any Solana wallet (Phantom, Solflare, etc.)
+- **Account Initialization:** One-time setup to create your personal message board account
+- **Post Messages:** Write and store messages on-chain (max 280 characters, similar to Twitter)
+- **Message History:** View your last 10 messages with timestamps
+- **Circular Buffer:** Automatically overwrites oldest messages when limit is reached
 
-- Feature 1: [Description]
-- Feature 2: [Description]
-- ...
-  
 ### How to Use the dApp
-[TODO: Provide step-by-step instructions for users to interact with your dApp]
 
-1. **Connect Wallet**
-2. **Main Action 1:** [Step-by-step instructions]
-3. **Main Action 2:** [Step-by-step instructions]
-4. ...
+1. **Connect Wallet:** Click "Select Wallet" button and connect your Solana wallet (make sure you're on Devnet)
+2. **Initialize Account:** Click "Initialize Account" to create your personal message board (one-time action, costs ~0.002 SOL)
+3. **Post Messages:** Type your message (up to 280 characters) and click "Post Message"
+4. **View History:** See your last 10 messages displayed below the input area
 
 ## Program Architecture
-[TODO: Describe your Solana program's architecture. Explain the main instructions, account structures, and data flow.]
+
+The program is built using Anchor 0.31.1 and consists of two main instructions that manage user message boards on-chain.
 
 ### PDA Usage
-[TODO: Explain how you implemented Program Derived Addresses (PDAs) in your project. What seeds do you use and why?]
+
+The program uses a single PDA (Program Derived Address) to store each user's message board account.
 
 **PDAs Used:**
-- PDA 1: [Purpose and description]
-- PDA 2: [Purpose and description]
+- **User Account PDA:** Derived using seeds `["user", authority.key()]`
+  - **Purpose:** Creates a deterministic address for each user's message board
+  - **Why:** Allows users to have a unique, predictable account address without needing to generate and store keypairs
+  - **Benefits:** Simplifies account management and ensures each wallet has exactly one message board
 
 ### Program Instructions
-[TODO: List and describe all the instructions in your Solana program]
 
 **Instructions Implemented:**
-- Instruction 1: [Description of what it does]
-- Instruction 2: [Description of what it does]
-- ...
+- **initialize_user:** Creates a new user account (PDA) to store messages
+  - Initializes the account with the user's public key as authority
+  - Sets message_count to 0
+  - Creates an empty messages vector
+
+- **post_message:** Adds a new message to the user's account
+  - Validates message is not empty and not longer than 280 characters
+  - Stores message content and current timestamp
+  - Implements circular buffer logic (max 10 messages)
+  - Increments message_count
 
 ### Account Structure
-[TODO: Describe your main account structures and their purposes]
+
+The program uses two main data structures:
 
 ```rust
-// Example account structure (replace with your actual structs)
 #[account]
-pub struct YourAccountName {
-    // Describe each field
+#[derive(InitSpace)]
+pub struct UserAccount {
+    pub authority: Pubkey,        // The wallet that owns this message board (32 bytes)
+    pub message_count: u64,       // Total number of messages posted (8 bytes)
+    #[max_len(10)]
+    pub messages: Vec<Message>,   // Last 10 messages (circular buffer)
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
+pub struct Message {
+    #[max_len(280)]
+    pub content: String,          // Message text (max 280 characters)
+    pub timestamp: i64,           // Unix timestamp when message was posted
 }
 ```
+
+**Constants:**
+- `MAX_MESSAGE_LENGTH = 280` - Maximum characters per message
+- `MAX_MESSAGES = 10` - Maximum messages stored per user
 
 ## Testing
 
 ### Test Coverage
-[TODO: Describe your testing approach and what scenarios you covered]
+
+The project includes comprehensive tests covering both happy and unhappy paths.
 
 **Happy Path Tests:**
-- Test 1: [Description]
-- Test 2: [Description]
-- ...
+- **Initialize User:** Successfully creates a new user account
+- **Post Message:** Successfully posts a message after initialization
+- **Post Multiple Messages:** Posts several messages and verifies they're stored correctly
+- **Post Max Length Message:** Posts a 280-character message successfully
 
 **Unhappy Path Tests:**
-- Test 1: [Description of error scenario]
-- Test 2: [Description of error scenario]
-- ...
+- **Post Without Initialization:** Attempts to post before initializing account (should fail)
+- **Empty Message:** Attempts to post an empty message (should fail with MessageEmpty error)
+- **Message Too Long:** Attempts to post a 281-character message (should fail with MessageTooLong error)
+- **Wrong Authority:** Attempts to post with wrong wallet (should fail with constraint violation)
 
 ### Running Tests
 ```bash
-# Commands to run your tests
+cd anchor_project/message_board
 anchor test
 ```
 
+All 8 tests pass successfully.
+
 ### Additional Notes for Evaluators
 
-[TODO: Add any specific notes or context that would help evaluators understand your project better]
+- **Program deployed on Devnet:** The program is live and functional on Solana Devnet
+- **Frontend is fully functional:** Users can connect wallet, initialize account, and post messages
+- **PDA implementation:** Uses deterministic PDAs for user accounts with seeds `["user", authority]`
+- **Error handling:** Custom errors for message validation (MessageTooLong, MessageEmpty)
+- **Circular buffer:** Automatically manages message history by overwriting oldest messages
+- **Timestamp tracking:** Each message includes Unix timestamp for chronological ordering
+- **Account space optimization:** Uses `InitSpace` derive macro for automatic space calculation
