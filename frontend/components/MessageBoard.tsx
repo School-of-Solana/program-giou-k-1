@@ -13,8 +13,9 @@ import {
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl, PublicKey } from "@solana/web3.js";
-import { Program, AnchorProvider, web3, BN } from "@coral-xyz/anchor";
+import { Program, AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { IDL } from "@/lib/idl";
+import * as borsh from "@coral-xyz/borsh";
 
 const PROGRAM_ID = new PublicKey("9NG82RTePVDeDpTZEc4v2c5CnyadftEyaT2v9864CQPX");
 
@@ -101,19 +102,26 @@ function MessageBoardContent() {
         return;
       }
 
-      // Decode the account data - skip the 8-byte discriminator
-      const decoded: any = program.coder.accounts.decode(
-        "UserAccount",
-        accountData.data
-      );
+      // Define the borsh schema manually based on our Rust struct
+      const messageSchema = borsh.struct([
+        borsh.str("content"),
+        borsh.i64("timestamp"),
+      ]);
+
+      const userAccountSchema = borsh.struct([
+        borsh.publicKey("authority"),
+        borsh.u64("messageCount"),
+        borsh.vec(messageSchema, "messages"),
+      ]);
+
+      // Skip the 8-byte discriminator and decode
+      const decoded = userAccountSchema.decode(accountData.data.slice(8));
+
       console.log("Decoded account:", decoded);
       console.log("Messages count:", decoded.messageCount?.toString());
       console.log("Messages array:", decoded.messages);
 
-      // Make sure messages is an array
-      const msgs = Array.isArray(decoded.messages) ? decoded.messages : [];
-      console.log("Setting messages:", msgs);
-      setMessages(msgs);
+      setMessages(decoded.messages || []);
     } catch (error) {
       console.error("Error fetching messages:", error);
       setMessages([]);

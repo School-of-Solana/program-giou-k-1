@@ -1,6 +1,6 @@
 # Project Description
 
-**Deployed Frontend URL:** https://frontend-giou-ks-projects.vercel.app
+**Deployed Frontend URL:** https://frontend-k1ge8njot-giou-ks-projects.vercel.app
 
 **Solana Program ID:** `9NG82RTePVDeDpTZEc4v2c5CnyadftEyaT2v9864CQPX`
 
