@@ -1,6 +1,11 @@
 # Project Description
 
-**Deployed Frontend URL:** https://frontend-k1ge8njot-giou-ks-projects.vercel.app
+**Deployed Frontend URL:** https://frontend-giou-k-giou-ks-projects.vercel.app/ <- publicly accessible link
+
+Solscan txs:
+https://solscan.io/tx/2ZbtJVgkEsLHks7S4Bt3dKLSi3GTNcsm3jM4iDyXxWmPd6Gfp5gK6R8K8K4AMfm953iMVJkQfDV7rUT34qR54DYY?cluster=devnet
+
+
 
 **Solana Program ID:** `9NG82RTePVDeDpTZEc4v2c5CnyadftEyaT2v9864CQPX`
 
