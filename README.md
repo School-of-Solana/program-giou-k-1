@@ -1,95 +1,119 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/TzDKD5h9)
-![School of Solana](https://github.com/Ackee-Blockchain/school-of-solana/blob/master/.banner/banner.png?raw=true)
+# Project Description
 
-## 📚Solana Program
-We are about halfway through the course, and you already have some experience with programming on Solana. It is time to create something on your own! You will be building a dApp that will serve as the culmination of everything you have learned so far. Feel free to implement whatever comes to your mind, (as long as it passes the requirements).
+**Deployed Frontend URL:** https://frontend-giou-k-giou-ks-projects.vercel.app/
 
-**This does not mean that the School of Solana is coming to an end just yet!** There are still several exciting lectures ahead, as well as one security related task.
+Solscan txs:
+https://solscan.io/tx/2ZbtJVgkEsLHks7S4Bt3dKLSi3GTNcsm3jM4iDyXxWmPd6Gfp5gK6R8K8K4AMfm953iMVJkQfDV7rUT34qR54DYY?cluster=devnet
 
-### Task details
-This task consists of two parts:
-1. **Core of your dApp**
-    - A deployed Solana program.
-2. **Frontend**
-    - A simple frontend to interact with the dApp.
 
-### Requirements
-- An Anchor program deployed on **Devnet** or **Mainnet**.
-- The Anchor program must use a PDA (Program Derived Address).
-- At least one TypeScript **test** for each Anchor program instruction. These tests should cover both **happy** and **unhappy** (intentional error-triggering) scenarios.
-- A simple **frontend** deployed using your preferred provider (for more info, check below).
-- A filled out **PROJECT_DESCRIPTION.md** file.
 
-### Ideas
-We highly recommend starting with something simple. Take time to think through your project and work on it in iterations. Do not try to implement everything at once!
+**Solana Program ID:** `9NG82RTePVDeDpTZEc4v2c5CnyadftEyaT2v9864CQPX`
 
-Below is a list of few ideas to get you started:
-- **Social app**
-    - Instagram
-    - Giphy
-    - Friendtech
-    - Spotify
-- **Blog**
-- **Voting** ([D21 - Janeček method](https://www.ih21.org/en/guidelines))
-- **DeFi**
-    - Raffles
-    - Escrow
-    - Tipping
-    - Lending ([Save Documentation](https://docs.save.finance/))
-    - Liquid Staking ([Marinade Documentation](https://docs.marinade.finance/))
-    - Data Query with Pyth ([Pyth Documentation](https://docs.pyth.network/price-feeds))
-    - AMM ([Raydium Documentation](https://raydium.gitbook.io/raydium/))
-- **Gaming**
-    - Browser Game ([Gaming on Solana](https://solanacookbook.com/gaming/nfts-in-games.html#nfts-in-games))
+# Project Overview
 
-### Deadline
-The deadline for this task is **Wednesday, November 19th, at 23:59 UTC**.
->[!CAUTION]
->Note that we will not accept submissions after the deadline.
+### Description
+This is a simple on-chain message board dApp built on Solana using the Anchor framework. Users can connect their wallet, initialize their account, and post messages that are stored permanently on the blockchain. The application demonstrates core Solana concepts including PDAs (Program Derived Addresses), account initialization, and state management.
 
-### Submission
-There are two folders, one for the Anchor project, and one for the frontend. Push your changes to the **main** branch of **this** repository.
+### Key Features
+- **Wallet Integration:** Connect using any Solana wallet (Phantom, Solflare, etc.)
+- **Account Initialization:** One-time setup to create your personal message board account
+- **Post Messages:** Write and store messages on-chain (max 280 characters, similar to Twitter)
+- **Message History:** View your last 10 messages with timestamps
+- **Circular Buffer:** Automatically overwrites oldest messages when limit is reached
 
->[!IMPORTANT]
->It is essential that you fill out the `PROJECT_DESCRIPTION.md` template completely and accurately. This document will be used by AI for the initial evaluation, so provide detailed information about your project, including working links, clear descriptions, and technical implementation details.
+### How to Use the dApp
 
->[!NOTE]
->Your submission repository is public. Feel free to share the link to showcase your work!
+1. **Connect Wallet:** Click "Select Wallet" button and connect your Solana wallet (make sure you're on Devnet)
+2. **Initialize Account:** Click "Initialize Account" to create your personal message board (one-time action, costs ~0.002 SOL)
+3. **Post Messages:** Type your message (up to 280 characters) and click "Post Message"
+4. **View History:** See your last 10 messages displayed below the input area
 
-### Evaluation
-The evaluation process is based on the **requirements**. If you meet the requirements, you pass the task!
+## Program Architecture
 
->[!NOTE]
->The first round of evaluations will be conducted by AI to verify requirements before manual review. AI can make mistakes. If you believe you fulfilled all requirements but weren't graded correctly, please create a support ticket and we will resolve the issue.
+The program is built using Anchor 0.31.1 and consists of two main instructions that manage user message boards on-chain.
 
->[!CAUTION]
->We expect original work that demonstrates your understanding and creativity. While you may draw inspiration from examples covered in lessons and tasks, **direct copying is not acceptable**. If you choose to build upon an example from the School of Solana materials, you must significantly expand it with additional features, instructions, and functionality to showcase your learning progress. 
+### PDA Usage
 
-### Example Workflow
-Let's say you are going to implement the Twitter dApp as the Solana Program. Here's how the steps could look:
+The program uses a single PDA (Program Derived Address) to store each user's message board account.
 
-**1.** Implement Twitter dApp using the Anchor framework.
+**PDAs Used:**
+- **User Account PDA:** Derived using seeds `["user", authority.key()]`
+  - **Purpose:** Creates a deterministic address for each user's message board
+  - **Why:** Allows users to have a unique, predictable account address without needing to generate and store keypairs
+  - **Benefits:** Simplifies account management and ensures each wallet has exactly one message board
 
-**2.** Test the Twitter dApp using the Anchor framework.
+### Program Instructions
 
-**3.** Deploy the Twitter dApp on the Solana Devnet.
+**Instructions Implemented:**
+- **initialize_user:** Creates a new user account (PDA) to store messages
+  - Initializes the account with the user's public key as authority
+  - Sets message_count to 0
+  - Creates an empty messages vector
 
-**4.** Using the create solana dapp template, implement frontend for the Twitter dApp.
+- **post_message:** Adds a new message to the user's account
+  - Validates message is not empty and not longer than 280 characters
+  - Stores message content and current timestamp
+  - Implements circular buffer logic (max 10 messages)
+  - Increments message_count
 
-**5.** Publish Frontend using [Vercel](https://vercel.com). Ensure the deployment is publicly accessible.
+### Account Structure
 
-**6.** Fill out the PROJECT_DESCRIPTION.md template.
+The program uses two main data structures:
 
-**7.** Submit the Twitter dApp using GitHub Classroom.
+```rust
+#[account]
+#[derive(InitSpace)]
+pub struct UserAccount {
+    pub authority: Pubkey,        // The wallet that owns this message board (32 bytes)
+    pub message_count: u64,       // Total number of messages posted (8 bytes)
+    #[max_len(10)]
+    pub messages: Vec<Message>,   // Last 10 messages (circular buffer)
+}
 
-### Useful Links
-- [Vercel](https://vercel.com)
-- [Create Solana Dapp](https://github.com/solana-foundation/create-solana-dapp)
-- [Account Macro Constraints](https://docs.rs/anchor-lang/0.31.1/anchor_lang/derive.Accounts.html)
-- [Solana Developers Courses](https://solana.com/developers/courses)
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
+pub struct Message {
+    #[max_len(280)]
+    pub content: String,          // Message text (max 280 characters)
+    pub timestamp: i64,           // Unix timestamp when message was posted
+}
+```
 
------
+**Constants:**
+- `MAX_MESSAGE_LENGTH = 280` - Maximum characters per message
+- `MAX_MESSAGES = 10` - Maximum messages stored per user
 
-### Need help?
->[!TIP]
->If you have any questions, feel free to reach out to us on [Discord](https://discord.gg/z3JVuZyFnp).
+## Testing
+
+### Test Coverage
+
+The project includes comprehensive tests covering both happy and unhappy paths.
+
+**Happy Path Tests:**
+- **Initialize User:** Successfully creates a new user account
+- **Post Message:** Successfully posts a message after initialization
+- **Post Multiple Messages:** Posts several messages and verifies they're stored correctly
+- **Post Max Length Message:** Posts a 280-character message successfully
+
+**Unhappy Path Tests:**
+- **Post Without Initialization:** Attempts to post before initializing account (should fail)
+- **Empty Message:** Attempts to post an empty message (should fail with MessageEmpty error)
+- **Message Too Long:** Attempts to post a 281-character message (should fail with MessageTooLong error)
+- **Wrong Authority:** Attempts to post with wrong wallet (should fail with constraint violation)
+
+### Running Tests
+```bash
+cd anchor_project/message_board
+anchor test
+```
+
+All 8 tests pass successfully.
+
+### Additional Notes for Evaluators
+
+- **Program deployed on Devnet:** The program is live and functional on Solana Devnet
+- **Frontend is fully functional:** Users can connect wallet, initialize account, and post messages
+- **PDA implementation:** Uses deterministic PDAs for user accounts with seeds `["user", authority]`
+- **Error handling:** Custom errors for message validation (MessageTooLong, MessageEmpty)
+- **Circular buffer:** Automatically manages message history by overwriting oldest messages
+- **Timestamp tracking:** Each message includes Unix timestamp for chronological ordering
+- **Account space optimization:** Uses `InitSpace` derive macro for automatic space calculation
